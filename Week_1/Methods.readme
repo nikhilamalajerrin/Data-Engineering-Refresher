@@ -12,3 +12,5 @@ automatically runs and creates the instances
 
 Create the from method to call python and the run to install whatever needed
 Place the py file in pipeline and build the file 
+
+Once built run the build using DOCKER RUN -it with the built name

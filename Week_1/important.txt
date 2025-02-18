@@ -30,7 +30,7 @@ docker run -it \
   -e POSTGRES_USER="root" \
   -e POSTGRES_PASSWORD="root" \
   -e POSTGRES_DB="ny_taxi" \
-  -v  /home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data \
+  -v  /home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data\
   -p 5432:5432 \
   --network=pg-network \
   --name pg-database \
@@ -107,3 +107,16 @@ docker run name \
   --db=ny_taxi \
   --table_name=yellow_taxi_trips \
   --url=${URL}
+
+-----------RUNNING A SCRIPT ---------------  
+
+docker run -it <above_name>
+    --network=pg-network
+
+
+
+
+
+
+------------DOCKER-COMPOSE-----------------
+
