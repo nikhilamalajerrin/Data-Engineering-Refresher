@@ -1,0 +1,6 @@
+1. Create the postgresql DB from docker and call the instance CONTAINERS
+2. Create the network so that the DB can communicate with the ADMIN gui 
+3. Create the PGadmin container 
+4. Python ingest_data
+5. Check the POSTGRES_DB
+RUN SQL commands 
