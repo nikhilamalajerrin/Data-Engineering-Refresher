@@ -1,8 +1,11 @@
 FROM python:3.13
 
-RUN pip install pandas
-RUN pip install pgcli
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /app
 
 #COPY pipeline.py pipeline.py
+COPY ingest_data.py injest_data.py
 
-#ENTRYPOINT ["python"]
+ENTRYPOINT ["python","injest_data.py"]

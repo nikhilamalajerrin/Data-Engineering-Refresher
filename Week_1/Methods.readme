@@ -4,3 +4,11 @@
 4. Python ingest_data
 5. Check the POSTGRES_DB
 RUN SQL commands 
+
+---------->
+
+Now we can dockerize this python scipt so that whenever we call the docker container it 
+automatically runs and creates the instances 
+
+Create the from method to call python and the run to install whatever needed
+Place the py file in pipeline and build the file 

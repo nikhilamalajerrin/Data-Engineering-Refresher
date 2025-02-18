@@ -56,7 +56,7 @@ docker run -it \
     --db=ny_taxi \
     --table_name=yellow_taxi_trips \
     --url=${URL}
-
+---------------GIT PUSH -------------------------
     #GIT
     git add .
     git add -- . ':!<path>'
@@ -65,10 +65,45 @@ docker run -it \
 
   /home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1
 
-  
+ -------SEE ALL CONTAINERS IN DOCKER--------------
+
 #docker
 docker ps -a 
 docker ps
 
+---------RUNNNING A SCRIPT INSIDE A PY-------------
 #URL
 https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
+
+python ingest_data.py \
+  --user=root \
+  --password=root \
+  --host=localhost \
+  --port=5432 \
+  --db=ny_taxi \
+  --table_name=yellow_taxi_trips \
+  --url=${URL}
+
+---------DOCKER BUILDING A PY SCRIPT-----------
+FROM python:3.13
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /app
+
+#COPY pipeline.py pipeline.py
+COPY injest_data.py injest_data.py
+
+ENTRYPOINT ["python","injest_data.py"]
+
+
+docker build -t <your_name>
+docker run name \
+  --user=root \
+  --password=root \
+  --host=localhost \
+  --port=5432 \
+  --db=ny_taxi \
+  --table_name=yellow_taxi_trips \
+  --url=${URL}
