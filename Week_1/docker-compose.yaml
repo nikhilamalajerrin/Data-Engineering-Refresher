@@ -2,13 +2,15 @@ services:
   pgdatabase:
     image: postgres:13
     environment:
-      - POSTGRES_USER= root 
+      - POSTGRES_USER=root 
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=ny_taxi 
     volumes:
-      - ./home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data
+      - "./home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
+    networks:
+      - my_network  
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -16,5 +18,10 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=root 
     ports:
       - "8080:80"
+    networks:
+      - my_network 
 
-      
+networks:
+  my_network:
+    driver: bridge         
+

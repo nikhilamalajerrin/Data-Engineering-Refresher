@@ -73,7 +73,7 @@ docker ps
 
 ---------RUNNNING A SCRIPT INSIDE A PY-------------
 #URL
-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
+URL ="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
 
 python ingest_data.py \
   --user=root \
@@ -97,8 +97,8 @@ COPY injest_data.py injest_data.py
 
 ENTRYPOINT ["python","injest_data.py"]
 
-
-docker build -t <your_name>
+##############################
+docker build -t <your_name> .
 docker run name \
   --user=root \
   --password=root \
@@ -109,14 +109,55 @@ docker run name \
   --url=${URL}
 
 -----------RUNNING A SCRIPT ---------------  
+URL=https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
 
-docker run -it <above_name>
-    --network=pg-network
-
-
-
-
-
+docker run -it \
+  --network=pg-network \
+  taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pg-database \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_trips \
+    --url=${URL}
 
 ------------DOCKER-COMPOSE-----------------
 
+sudo docker compose up -- runs all the CONTAINERS
+docker compose down 
+
+services:
+  pgdatabase:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER= root 
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=ny_taxi 
+    volumes:
+      - "./home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network  
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com 
+      - PGADMIN_DEFAULT_PASSWORD=root 
+    ports:
+      - "8080:80"
+    networks:
+      - my_network 
+
+networks:
+  my_network:
+    driver: bridge         
+
+
+
+
+---------NOTE---------------
+
+We can also automate the ingest_data py file as a docker CONTAINERSbut it would
+be better if we use Apache Airflow. 

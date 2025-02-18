@@ -3,3 +3,4 @@ pyarrow
 requests
 sqlalchemy
 pgcli
+psycopg2
