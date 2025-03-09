@@ -41,31 +41,36 @@ with DAG(
 
 
     def fetch_ais_data(ds, **kwargs):
-        file_name = f"AIS_2024_01_01.zip"
-        file_url = f"{BASE_URL}/{file_name}"
-        local_zip_path = os.path.join(DOWNLOAD_PATH, file_name)
+        """Fetch AIS data for both staging and stagnant tables."""
+        file_names = ["AIS_2024_01_01.zip", "AIS_2024_01_02.zip"]  # ✅ Download both files
 
         session = requests.Session()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         session.mount("https://", HTTPAdapter(max_retries=retries))
 
-        try:
-            with session.get(file_url, stream=True, timeout=30) as response:
-                response.raise_for_status()  # Raise error for bad status codes
+        for file_name in file_names:
+            file_url = f"{BASE_URL}/{file_name}"
+            local_zip_path = os.path.join(DOWNLOAD_PATH, file_name)
 
-                with open(local_zip_path, 'wb') as file:
-                    for chunk in response.iter_content(chunk_size=8192):  # ✅ Larger chunks reduce failures
-                        file.write(chunk)
+            try:
+                with session.get(file_url, stream=True, timeout=30) as response:
+                    response.raise_for_status()  # Raise error for bad status codes
 
-            print(f"✅ Successfully downloaded {file_name}")
+                    with open(local_zip_path, 'wb') as file:
+                        for chunk in response.iter_content(chunk_size=8192):  # ✅ Larger chunks reduce failures
+                            file.write(chunk)
 
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Download failed: {e}")
-            raise Exception(f"Download failed for {file_name}")
+                print(f"✅ Successfully downloaded {file_name}")
+
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Download failed: {e}")
+                raise Exception(f"Download failed for {file_name}")
+
 
 
 
     def extract_data():
+        """Extracts and filters first 100 rows of each AIS dataset."""
         for file in os.listdir(DOWNLOAD_PATH):
             if file.endswith(".zip"):
                 with zipfile.ZipFile(os.path.join(DOWNLOAD_PATH, file), 'r') as zip_ref:
@@ -87,27 +92,31 @@ with DAG(
 
 
 
-    def load_to_staging():
+    def load_to_database():
+        """Loads first 100 rows of extracted AIS data into separate MySQL tables."""
         mysql_hook = MySqlHook(mysql_conn_id="my_sql")
         engine = mysql_hook.get_sqlalchemy_engine()
 
-        for csv_file in os.listdir(EXTRACT_PATH):
-            if csv_file.endswith(".csv"):
-                file_path = os.path.join(EXTRACT_PATH, csv_file)
-                df = pd.read_csv(file_path)
+        table_mapping = {
+            "AIS_2024_01_01.csv": "ais_staging",
+            "AIS_2024_01_02.csv": "ais_stagnant",
+        }
 
-                # ✅ Load data without dropping table schema
-                df.to_sql(STAGING_TABLE, con=engine, if_exists="append", index=False)
+        for csv_file, table_name in table_mapping.items():
+            file_path = os.path.join(EXTRACT_PATH, csv_file)
+            
+            if os.path.exists(file_path):
+                df = pd.read_csv(file_path, nrows=100)  # ✅ Ensure only 100 rows
 
-                print(f"✅ Loaded {csv_file} into {STAGING_TABLE}")
+                df.to_sql(table_name, con=engine, if_exists="replace", index=False)
+                print(f"✅ Loaded first 100 rows from {csv_file} into {table_name}")
 
-        print("🎯 Data successfully loaded into staging table!")
+        print("🎯 Data successfully loaded into MySQL!")
 
-    # Define tasks
+
     fetch_task = PythonOperator(
         task_id="fetch_ais_data",
         python_callable=fetch_ais_data,
-        op_kwargs={"ds": "{{ ds }}"},  # ✅ Pass execution date dynamically
     )
 
     extract_task = PythonOperator(
@@ -115,12 +124,16 @@ with DAG(
         python_callable=extract_data,
     )
 
-    load_staging_task = PythonOperator(
-        task_id="load_to_staging",
-        python_callable=load_to_staging,
+    load_task = PythonOperator(
+        task_id="load_to_database",
+        python_callable=load_to_database,
     )
 
-    # Task dependencies
-    fetch_task >> extract_task >> load_staging_task
+    fetch_task >> extract_task >> load_task
+
+
+
+
+
 
 
