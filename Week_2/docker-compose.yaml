@@ -2,27 +2,25 @@ services:
   pgdatabase:
     image: postgres:13
     environment:
-      - POSTGRES_USER=root 
+      - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=ny_taxi 
+      - POSTGRES_DB=ais
     volumes:
-      - "./home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data"
+      - "./home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_2/ais_pg:/var/lib/postgresql/data"
     ports:
-      - "5432:5432"
+      - "5431:5432"
     networks:
-      - my_network  
+      - week-2_884d23_airflow  
   pgadmin:
     image: dpage/pgadmin4
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com 
       - PGADMIN_DEFAULT_PASSWORD=root 
     ports:
-      - "8080:80"
+      - "8081:80"
     networks:
-      - my_network 
+      - week-2_884d23_airflow 
 
 networks:
-  my_network:
-    driver: bridge         
-
-
+  week-2_884d23_airflow:
+    driver: bridge

@@ -24,3 +24,5 @@ docker run -it \
       -v /home/nikhil-james/Workspace/Data-Engineering-Refresher/Week_1/ny_taxi_postgres:/var/lib/postgresql/data:rw \
       -p 5432:5432\   
 postgres:13
+
+
