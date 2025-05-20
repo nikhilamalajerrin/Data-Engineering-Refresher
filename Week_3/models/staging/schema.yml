@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+ - name: staging
+   database: ais-astro
+   schema: ais_data
+
+   tables:
+    - name: ais_staging
+
+    - name: ais_stagnant  
